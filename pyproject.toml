@@ -1,0 +1,26 @@
+[project]
+name = "llm-foundry"
+version = "0.1.0"
+description = "Unified framework for training small language models from scratch, integrating existing LLMs, and adding safety/reasoning layers"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "man43"}]
+dependencies = []
+
+[project.optional-dependencies]
+local = ["torch>=2.4", "transformers>=4.45"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+llm-foundry = "llm_foundry.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
