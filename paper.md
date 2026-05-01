@@ -1,14 +1,14 @@
-# Aegis Foundry: A Modular Framework for Training, Integrating, and Safeguarding Language Models
+# LLM Foundry: A Modular Framework for Training, Integrating, and Safeguarding Language Models
 
 ## Abstract
 
-Large language models are useful when they are not only capable, but also easy to integrate, easy to test, and hard to misuse. This paper presents Aegis Foundry, a modular framework that unifies three layers: scratch-scale language model training, drop-in adapters for existing models, and safety and reasoning overlays that can be used at inference time or inside agent loops. The design is intentionally practical. Instead of pretending that a single laptop project can train frontier-scale models, Aegis Foundry cleanly separates small-scale from-scratch training from production integration with hosted or locally served models. The framework adds three novel system-level ideas that are implemented as composable modules: a reflection loop, a counterfactual verification layer, and a causal safety shaper. Together, these modules create a reusable control plane for reasoning quality, delayed-harm screening, and model-agnostic deployment.
+Large language models are useful when they are not only capable, but also easy to integrate, easy to test, and hard to misuse. This paper presents LLM Foundry, a modular framework that unifies three layers: scratch-scale language model training, drop-in adapters for existing models, and safety and reasoning overlays that can be used at inference time or inside agent loops. The design is intentionally practical. Instead of pretending that a single laptop project can train frontier-scale models, LLM Foundry cleanly separates small-scale from-scratch training from production integration with hosted or locally served models. The framework adds three system-level ideas that are implemented as composable modules: a reflection loop, a counterfactual verification layer, and a causal safety shaper. Together, these modules create a reusable control plane for reasoning quality, delayed-harm screening, and model-agnostic deployment.
 
 ## 1. Introduction
 
 Transformer language models became the dominant architecture because self-attention made sequence modeling flexible and parallelizable [1]. Since then, the field has split into two practical tracks. One track is model creation, where a team wants to train or fine-tune a model. The other track is model operation, where a team wants to wrap an existing model with better reliability, evaluation, and safety. Most real deployments need both.
 
-Aegis Foundry is built around that reality. It does not assume that every user wants to train a base model from scratch. It also does not assume that all model work is just prompting a remote API. Instead, it provides a single framework that can host a tiny educational causal LM, connect to hosted APIs, connect to local Hugging Face models, and apply the same evaluation and safety logic everywhere.
+LLM Foundry is built around that reality. It does not assume that every user wants to train a base model from scratch. It also does not assume that all model work is just prompting a remote API. Instead, it provides a single framework that can host a tiny educational causal LM, connect to hosted APIs, connect to local Hugging Face models, and apply the same evaluation and safety logic everywhere.
 
 ## 2. Design Goals
 
@@ -89,7 +89,7 @@ This is a practical approximation of delayed-harm mitigation. It does not requir
 
 ## 5. Production Use Cases
 
-Aegis Foundry is useful in several settings.
+LLM Foundry is useful in several settings.
 
 ### 5.1 Building a new language model
 
@@ -115,7 +115,7 @@ The framework is useful for studying delayed reward, counterfactual credit assig
 
 The novelty is not a single magic model architecture. The novelty is the control plane.
 
-Most model stacks treat reasoning, safety, and training as unrelated tasks. Aegis Foundry makes them composable.
+Most model stacks treat reasoning, safety, and training as unrelated tasks. LLM Foundry makes them composable.
 
 That gives three advantages:
 
@@ -133,7 +133,7 @@ The scratch training path is tiny by design. The safety layer is heuristic by de
 
 ## 8. Conclusion
 
-Aegis Foundry turns language model work into a modular system instead of a pile of one-off scripts. It can be used to build a new model, wrap an existing one, evaluate both, and add safety and reasoning controls at the same time. That makes it a practical research platform and a production-oriented integration layer.
+LLM Foundry turns language model work into a modular system instead of a pile of one-off scripts. It can be used to build a new model, wrap an existing one, evaluate both, and add safety and reasoning controls at the same time. That makes it a practical research platform and a production-oriented integration layer.
 
 ## References
 

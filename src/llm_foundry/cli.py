@@ -10,7 +10,7 @@ from .safety import SafetyLayer
 from .training import train_from_text
 
 
-PROJECT_NAME = "aegis-foundry"
+PROJECT_NAME = "llm-foundry"
 VERSION = "0.1.0"
 
 

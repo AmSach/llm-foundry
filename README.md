@@ -1,11 +1,11 @@
-# Aegis Foundry
+# LLM Foundry
 
 A modular framework for two jobs:
 
 1. train a language model from scratch at toy or research scale
 2. wrap, steer, evaluate, and safety-check existing LLMs
 
-Aegis Foundry is the production-facing name for the system. It is designed as a reusable control plane for model creation, model integration, reasoning overlays, and safety scoring. The same stack can sit on top of a scratch-trained model, a local Hugging Face model, or a remote OpenAI-compatible endpoint.
+LLM Foundry is the production-facing name for the system. It is designed as a reusable control plane for model creation, model integration, reasoning overlays, and safety scoring. The same stack can sit on top of a scratch-trained model, a local Hugging Face model, or a remote OpenAI-compatible endpoint.
 
 ## Production-ready positioning
 
@@ -49,6 +49,7 @@ What this repo does is give you one clean place to plug in:
 
 ```bash
 cd /home/workspace/Projects/llm-foundry
+python -m pip install -e .
 python -m llm_foundry smoke-test
 ```
 
@@ -82,4 +83,4 @@ python -m llm_foundry demo \
 
 ## GitHub
 
-This repo is being prepared for GitHub now. Once GitHub auth is completed, it can be created as a remote repository and pushed immediately.
+This repo is ready to publish. The source of truth is the GitHub repository, and the paper and usage docs live in the repo root for easy browsing.

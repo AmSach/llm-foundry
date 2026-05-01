@@ -1,4 +1,4 @@
-# Aegis Foundry use cases
+# LLM Foundry use cases
 
 ## 1. Build a model from scratch
 
