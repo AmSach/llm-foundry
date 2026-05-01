@@ -1,4 +1,6 @@
-from llm_foundry.core import EchoBackend, ReflectionEngine, SafetyLayer, RewardShaper
+from llm_foundry import EchoBackend, ReflectionEngine, RewardShaper, SafetyLayer, build_backend
+from llm_foundry.core import ReflectionEngine as CoreReflectionEngine
+from llm_foundry.evaluation import EvaluationItem, EvaluationSuite
 
 
 def test_safety_scores_known_harm_terms():
@@ -11,7 +13,13 @@ def test_safety_scores_known_harm_terms():
 def test_reflection_engine_runs():
     engine = ReflectionEngine(EchoBackend())
     result = engine.answer("Say hi")
-    assert result["final"] == result["draft"]
+    assert result.final == result.draft
+
+
+def test_core_reexports_work():
+    engine = CoreReflectionEngine(EchoBackend())
+    result = engine.answer("Say hi")
+    assert result.final == result.draft
 
 
 def test_reward_shaper_returns_float():
@@ -19,3 +27,15 @@ def test_reward_shaper_returns_float():
     shaper = RewardShaper(safety)
     reward = shaper.shaped_reward("prompt", "safe response", 1.0)
     assert isinstance(reward, float)
+
+
+def test_eval_suite_runs():
+    suite = EvaluationSuite(EchoBackend())
+    results = suite.run([EvaluationItem(prompt="hello")])
+    assert len(results) == 1
+    assert results[0].allowed is True
+
+
+def test_build_backend_echo():
+    backend = build_backend("echo")
+    assert backend.generate("x") == "x"
