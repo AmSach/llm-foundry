@@ -5,17 +5,18 @@ A modular framework for two jobs:
 1. train a language model from scratch at toy or research scale
 2. wrap, steer, evaluate, and safety-check existing LLMs
 
-LLM Foundry is the production-facing name for the system. It is designed as a reusable control plane for model creation, model integration, reasoning overlays, and safety scoring. The same stack can sit on top of a scratch-trained model, a local Hugging Face model, or a remote OpenAI-compatible endpoint.
+LLM Foundry is the production-facing name for the system. It is designed as a reusable control plane for model creation, model integration, reasoning overlays, benchmark generation, and safety scoring. The same stack can sit on top of a scratch-trained model, a local Hugging Face model, or a remote OpenAI-compatible endpoint.
 
-## Production-ready positioning
+## What it is now
 
-This repo is structured to behave like a real engineering platform rather than a one-off demo:
+This repo is a usable LLM framework, not a frontier model. It gives you:
 
-- backend abstraction for multiple model sources
-- testable reasoning and safety modules
-- small scratch-training path for local validation
-- evaluation harness for repeatable checks
-- CLI entrypoints that are easy to automate
+- a backend abstraction for multiple model sources
+- a scratch training path for local experiments
+- reflection, counterfactual verification, and consensus modules
+- safety scoring and reward shaping
+- benchmark tooling that emits JSON and Markdown reports
+- GitHub Actions CI for repeatable testing
 
 ## Use cases
 
@@ -24,33 +25,29 @@ This repo is structured to behave like a real engineering platform rather than a
 - compare candidate models under the same evaluation policy
 - gate agent actions with delayed-harm scoring
 - prototype research ideas before moving to distributed training
+- generate benchmark artifacts for GitHub documentation
 
-## What it includes
+## Important reality check
 
-- a backend interface for any text model
-- an OpenAI-compatible adapter
-- a local Hugging Face adapter
-- a tiny from-scratch causal LM for demos and experiments
-- delayed-reward and causal-attribution helpers
-- self-consistency and reflection utilities
-- an evaluation suite and CLI for quick experiments
+This codebase does not yet compete with GPT-5.5 class or Claude-class frontier models on its own. To get there you would need scale in three places:
 
-## What it does not pretend to be
+- data quality and data volume
+- model size and training infrastructure
+- much stronger reasoning and verification loops, usually trained jointly with the base model
 
-This is not a trillion-token training system out of the box. For that, you still need distributed compute, data pipelines, and serious infrastructure.
-
-What this repo does is give you one clean place to plug in:
-- training code for new models
-- adapters for existing models
-- safety layers and evaluation harnesses
-- experiment scripts that are easy to extend
+What this repo does is give you the scaffolding for that work, plus benchmark and packaging hooks so you can iterate fast.
 
 ## Quick start
 
 ```bash
 cd /home/workspace/Projects/llm-foundry
-python -m pip install -e .
 python -m llm_foundry smoke-test
+```
+
+## Benchmark suite
+
+```bash
+python -m llm_foundry benchmark --backend echo --output benchmark.json --markdown benchmark.md
 ```
 
 ## From scratch demo
@@ -77,10 +74,11 @@ python -m llm_foundry demo \
 - `src/llm_foundry/reasoning.py` - reflection, verification, and consensus helpers
 - `src/llm_foundry/safety.py` - delayed-harm scoring and reward shaping
 - `src/llm_foundry/training.py` - scratch-model training helpers and a small Transformer path
-- `src/llm_foundry/evaluation.py` - repeatable prompt evaluation
+- `src/llm_foundry/benchmarks.py` - benchmark cases, reports, and scoring
 - `src/llm_foundry/cli.py` - command line entrypoint
+- `.github/workflows/ci.yml` - GitHub Actions smoke test and benchmark workflow
 - `examples/` - runnable examples and toy corpora
 
-## GitHub
+## Documentation
 
-This repo is ready to publish. The source of truth is the GitHub repository, and the paper and usage docs live in the repo root for easy browsing.
+The paper and use cases live in the repo root as Markdown files so GitHub renders them directly.

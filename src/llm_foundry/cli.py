@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from .adapters import build_backend
+from .benchmark import BenchmarkSuite, default_benchmark_cases
 from .evaluation import EvaluationItem, EvaluationSuite
 from .reasoning import ReflectionEngine
 from .safety import SafetyLayer
@@ -28,6 +29,13 @@ def build_parser() -> argparse.ArgumentParser:
     eval_cmd.add_argument("--backend", default="echo")
     eval_cmd.add_argument("--model", default=None)
     eval_cmd.add_argument("--prompt", action="append", required=True)
+
+    benchmark = sub.add_parser("benchmark")
+    benchmark.add_argument("--backend", default="echo")
+    benchmark.add_argument("--model", default=None)
+    benchmark.add_argument("--output", default="benchmark.json")
+    benchmark.add_argument("--markdown", default="benchmark.md")
+    benchmark.add_argument("--case", action="append")
 
     smoke = sub.add_parser("smoke-test")
     smoke.add_argument("--corpus", default="examples/corpus.txt")
@@ -58,6 +66,20 @@ def main() -> None:
         results = suite.run(EvaluationItem(prompt=prompt) for prompt in args.prompt)
         for item in results:
             print(f"allowed={item.allowed} risk={item.delayed_harm_risk:.2f} prompt={item.prompt}")
+        return
+    if args.cmd == "benchmark":
+        backend = build_backend(args.backend, args.model)
+        suite = BenchmarkSuite(backend)
+        cases = default_benchmark_cases()
+        if args.case:
+            selected = {name.strip() for name in args.case}
+            cases = [case for case in cases if case.name in selected]
+        report = suite.run(cases)
+        json_path = report.write_json(args.output)
+        md_path = report.write_markdown(args.markdown)
+        print(f"total={report.total} passed={report.passed} pass_rate={report.pass_rate:.2%} mean_risk={report.mean_risk:.3f}")
+        print(f"wrote {json_path}")
+        print(f"wrote {md_path}")
         return
     if args.cmd == "smoke-test":
         corpus = Path(args.corpus)

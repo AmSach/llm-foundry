@@ -27,6 +27,15 @@ class FixedBackend:
 
 
 @dataclass
+class ScriptedBackend:
+    responses: dict[str, str]
+    default_response: str = ""
+
+    def generate(self, prompt: str) -> str:
+        return self.responses.get(prompt, self.default_response)
+
+
+@dataclass
 class OpenAICompatibleBackend:
     api_key: str
     model: str
