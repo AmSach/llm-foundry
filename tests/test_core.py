@@ -1,4 +1,4 @@
-from llm_foundry import EchoBackend, ReflectionEngine, RewardShaper, SafetyLayer, build_backend
+from llm_foundry import EchoBackend, FixedBackend, ReflectionEngine, RewardShaper, SafetyLayer, SequenceBackend, ToolRegistry, AgentRuntime, LocalRetriever, CascadeReasoner, build_backend
 from llm_foundry.core import ReflectionEngine as CoreReflectionEngine
 from llm_foundry.evaluation import EvaluationItem, EvaluationSuite
 
@@ -39,3 +39,37 @@ def test_eval_suite_runs():
 def test_build_backend_echo():
     backend = build_backend("echo")
     assert backend.generate("x") == "x"
+
+
+def test_sequence_backend_returns_ordered_values():
+    backend = SequenceBackend(["a", "b"], default_response="z")
+    assert backend.generate("p") == "a"
+    assert backend.generate("p") == "b"
+    assert backend.generate("p") == "z"
+
+
+def test_agent_runtime_can_call_tools():
+    tools = ToolRegistry(workspace_root="/home/workspace/Projects/llm-foundry")
+    backend = SequenceBackend([
+        '{"tool":"workspace.list","arguments":{"path":"."}}',
+        '{"tool":"final","arguments":{"answer":"done"}}',
+    ])
+    runtime = AgentRuntime(backend=backend, tools=tools, max_steps=3)
+    trace = runtime.run("list the repo")
+    assert trace.final == "done"
+    assert trace.steps[0].action == "workspace.list"
+
+
+def test_retriever_finds_documents():
+    retriever = LocalRetriever("/home/workspace/Projects/llm-foundry")
+    results = retriever.search("reflection")
+    assert results
+
+
+def test_cascade_reasoner_uses_revision():
+    draft = FixedBackend("draft")
+    judge = SequenceBackend(["REVISE because it is unclear", "final revised answer"])
+    reasoner = CascadeReasoner(draft, judge)
+    result = reasoner.answer("prompt")
+    assert result.used_revision is True
+    assert result.final == "final revised answer"

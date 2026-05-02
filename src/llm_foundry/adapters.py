@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 import json
 import os
@@ -24,6 +24,20 @@ class FixedBackend:
 
     def generate(self, prompt: str) -> str:
         return self.response
+
+
+@dataclass
+class SequenceBackend:
+    responses: list[str] = field(default_factory=list)
+    default_response: str = ""
+    index: int = 0
+
+    def generate(self, prompt: str) -> str:
+        if self.index < len(self.responses):
+            response = self.responses[self.index]
+            self.index += 1
+            return response
+        return self.default_response
 
 
 @dataclass
