@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .adapters import build_backend
+from .agent import ToolPolicy, ToolRegistry
 from .benchmark import BenchmarkSuite, default_benchmark_cases
 from .config import ModelConfig
 from .datasets import TraceDataset
@@ -14,19 +15,18 @@ from .memory import CompressionEngine, ObsidianMemoryVault
 from .model_training import train_model_from_corpus
 from .reasoning import ReflectionEngine
 from .safety import SafetyLayer
+from .studio import run_studio
 from .super_suit import ModelSuperSuit, SuperSuitConfig
 from .training import train_from_text
-from .agent import AgentRuntime, ToolPolicy, ToolRegistry
-
 
 PROJECT_NAME = "llm-foundry"
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog=PROJECT_NAME)
     parser.add_argument("--version", action="version", version=f"{PROJECT_NAME} {VERSION}")
-    sub = parser.add_subparsers(dest="cmd", required=True)
+    sub = parser.add_subparsers(dest="cmd", required=False)
 
     demo = sub.add_parser("demo")
     demo.add_argument("--backend", default="echo")
@@ -115,6 +115,8 @@ def build_parser() -> argparse.ArgumentParser:
     supersuit.add_argument("--max-steps", type=int, default=8)
     supersuit.add_argument("--target-tokens", type=int, default=512)
 
+    studio = sub.add_parser("studio")
+
     train = sub.add_parser("train-scratch")
     train.add_argument("--corpus", required=True)
     train.add_argument("--steps", type=int, default=100)
@@ -134,6 +136,9 @@ def _backend_kwargs(args: argparse.Namespace) -> dict:
 
 def main() -> None:
     args = build_parser().parse_args()
+    if args.cmd is None or args.cmd == "studio":
+        run_studio(backend_factory=lambda kind, model, **kwargs: build_backend(kind, model, **kwargs))
+        return
     if args.cmd == "demo":
         backend = build_backend(args.backend, args.model, **_backend_kwargs(args))
         engine = ReflectionEngine(backend)
