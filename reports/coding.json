@@ -1,0 +1,24 @@
+{
+  "name": "coding",
+  "total": 3,
+  "passed": 3,
+  "pass_rate": 1.0,
+  "generated_at": "2026-05-02T01:29:59.662678+00:00",
+  "details": [
+    {
+      "name": "python_add_function",
+      "passed": true,
+      "notes": ""
+    },
+    {
+      "name": "python_sort_list",
+      "passed": true,
+      "notes": ""
+    },
+    {
+      "name": "json_parse",
+      "passed": true,
+      "notes": ""
+    }
+  ]
+}

@@ -7,7 +7,7 @@ from collections import Counter
 import json
 import math
 import re
-from typing import Iterable, Sequence
+from typing import Sequence
 
 from .tokenizer import estimate_token_count
 
@@ -68,13 +68,12 @@ class CompressedContext:
     memory_pack: str
     token_estimate_before: int
     token_estimate_after: int
+    compressed_prompt: str = ""
 
     def to_prompt(self) -> str:
-        parts = [
-            "MEMORY SUMMARY:",
-            self.summary.strip(),
-            "",
-        ]
+        if self.compressed_prompt:
+            return self.compressed_prompt
+        parts = ["MEMORY SUMMARY:", self.summary.strip(), ""]
         if self.salient_facts:
             parts.extend(["SALIENT FACTS:"] + [f"- {fact}" for fact in self.salient_facts] + [""])
         if self.action_items:
@@ -134,7 +133,7 @@ class ObsidianMemoryVault:
         blocks: list[str] = []
         total = 0
         for match in matches:
-            block = f"[{match.note.title}] ({', '.join(match.note.tags)})\n{match.excerpt}\n"
+            block = f"[{match.note.title}] ({', '.join(match.note.tags)})\n{_shorten(match.excerpt, 220)}\n"
             if total + len(block) > max_chars:
                 break
             blocks.append(block)
@@ -143,30 +142,31 @@ class ObsidianMemoryVault:
 
 
 class CompressionEngine:
-    def __init__(self, vault: ObsidianMemoryVault | None = None, summary_sentences: int = 6) -> None:
+    def __init__(self, vault: ObsidianMemoryVault | None = None, summary_sentences: int = 4) -> None:
         self.vault = vault
         self.summary_sentences = summary_sentences
 
     def compress_transcript(self, task: str, transcript: Sequence[str], memory_query: str = "", target_tokens: int = 512) -> CompressedContext:
         text = "\n".join(_clean_line(line) for line in transcript if line.strip())
         before = estimate_token_count(text)
+        task_terms = _tokenize(task)
         summary_sentences = _rank_sentences(text, task, self.summary_sentences)
-        salient_facts = _extract_bullets(text, ["must", "should", "need", "important", "remember", "because"])
-        action_items = _extract_bullets(text, ["todo", "action", "next", "do", "run", "write"])
-        open_questions = _extract_questions(text)
-        memory_pack = self.vault.render_pack(memory_query or task, top_k=5, max_chars=target_tokens * 4) if self.vault else ""
-        summary = " ".join(summary_sentences) if summary_sentences else _default_summary(task, text)
-        after_parts = [summary] + salient_facts + action_items + open_questions + ([memory_pack] if memory_pack else [])
-        after = estimate_token_count("\n".join(after_parts))
+        salient_facts = _extract_bullets(text, ["must", "should", "need", "important", "remember", "because"], task_terms)
+        action_items = _extract_bullets(text, ["todo", "action", "next", "do", "run", "write"], task_terms)
+        open_questions = _extract_questions(text, task_terms)
+        memory_pack = self.vault.render_pack(memory_query or task, top_k=5, max_chars=target_tokens * 3) if self.vault else ""
+        compressed_prompt = self._assemble_prompt(task, summary_sentences, salient_facts, action_items, open_questions, memory_pack, target_tokens)
+        after = estimate_token_count(compressed_prompt)
         return CompressedContext(
             task=task,
-            summary=summary,
+            summary=" ".join(summary_sentences) if summary_sentences else _default_summary(task, text),
             salient_facts=salient_facts,
             open_questions=open_questions,
             action_items=action_items,
             memory_pack=memory_pack,
             token_estimate_before=before,
             token_estimate_after=after,
+            compressed_prompt=compressed_prompt,
         )
 
     def save_context_note(self, context: CompressedContext, title: str | None = None) -> MemoryNote | None:
@@ -175,6 +175,56 @@ class CompressionEngine:
         note_title = title or f"Context for {context.task[:40]}"
         body = context.to_prompt()
         return self.vault.add_note(note_title, body, tags=["compressed", "agent", "memory"])
+
+    def _assemble_prompt(
+        self,
+        task: str,
+        summary_sentences: list[str],
+        salient_facts: list[str],
+        action_items: list[str],
+        open_questions: list[str],
+        memory_pack: str,
+        target_tokens: int,
+    ) -> str:
+        sections: list[tuple[str, list[str]]] = []
+        summary = [" ".join(summary_sentences).strip() or _default_summary(task, "")]
+        sections.append(("MEMORY SUMMARY", summary))
+        if salient_facts:
+            sections.append(("SALIENT FACTS", [f"- {item}" for item in salient_facts]))
+        if action_items:
+            sections.append(("ACTION ITEMS", [f"- {item}" for item in action_items]))
+        if open_questions:
+            sections.append(("OPEN QUESTIONS", [f"- {item}" for item in open_questions]))
+        if memory_pack:
+            sections.append(("RELEVANT NOTES", [memory_pack]))
+
+        def render(active_sections: list[tuple[str, list[str]]]) -> str:
+            parts: list[str] = []
+            for title, lines in active_sections:
+                parts.append(f"{title}:")
+                parts.extend(lines)
+                parts.append("")
+            return "\n".join(parts).strip()
+
+        current = render(sections)
+        if estimate_token_count(current) <= target_tokens:
+            return current
+
+        drop_order = ["RELEVANT NOTES", "OPEN QUESTIONS", "ACTION ITEMS", "SALIENT FACTS"]
+        for title in drop_order:
+            sections = [section for section in sections if section[0] != title]
+            current = render(sections)
+            if estimate_token_count(current) <= target_tokens:
+                return current
+
+        if sections:
+            sections[0] = (sections[0][0], [_shorten(sections[0][1][0], 240)])
+            current = render(sections)
+            if estimate_token_count(current) <= target_tokens:
+                return current
+
+        max_chars = max(64, target_tokens * 4)
+        return current[:max_chars]
 
 
 def _split_frontmatter(text: str) -> tuple[dict[str, str], str]:
@@ -210,7 +260,10 @@ def _score_note(terms: list[str], note: MemoryNote) -> float:
     overlap = sum(min(tokens.get(term, 0), 1) for term in terms)
     title_bonus = sum(1 for term in terms if term in note.title.lower()) * 2.0
     link_bonus = sum(0.25 for term in terms if any(term in link.lower() for link in note.links))
-    return float(overlap + title_bonus + link_bonus)
+    recency_bonus = 0.0
+    if note.updated_at:
+        recency_bonus = 0.1
+    return float(overlap + title_bonus + link_bonus + recency_bonus)
 
 
 def _build_excerpt(text: str, terms: list[str], max_len: int = 280) -> str:
@@ -244,19 +297,30 @@ def _rank_sentences(text: str, task: str, limit: int) -> list[str]:
     return deduped
 
 
-def _extract_bullets(text: str, keywords: Sequence[str]) -> list[str]:
+def _extract_bullets(text: str, keywords: Sequence[str], task_terms: list[str]) -> list[str]:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
-    bullets: list[str] = []
+    scored: list[tuple[float, str]] = []
     for line in lines:
         lowered = line.lower()
-        if any(keyword in lowered for keyword in keywords):
-            bullets.append(f"{line}")
-    return bullets[:8]
+        score = sum(1.0 for keyword in keywords if keyword in lowered)
+        score += sum(0.25 for term in task_terms if term in lowered)
+        if score > 0:
+            scored.append((score, line))
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [item[1] for item in scored[:8]]
 
 
-def _extract_questions(text: str) -> list[str]:
+def _extract_questions(text: str, task_terms: list[str]) -> list[str]:
     questions = [sentence.strip() for sentence in re.split(r"(?<=[?])\s+", text) if "?" in sentence]
-    return questions[:6]
+    scored = sorted(questions, key=lambda q: _sentence_score(q, task_terms), reverse=True)
+    return scored[:6]
+
+
+def _shorten(text: str, max_chars: int) -> str:
+    text = " ".join(text.split())
+    if len(text) <= max_chars:
+        return text
+    return text[: max(0, max_chars - 1)].rstrip() + "…"
 
 
 def _clean_line(line: str) -> str:

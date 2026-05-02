@@ -1,0 +1,14 @@
+{
+  "name": "tool-use",
+  "total": 1,
+  "passed": 1,
+  "pass_rate": 1.0,
+  "generated_at": "2026-05-02T01:29:59.662830+00:00",
+  "details": [
+    {
+      "name": "agent_trace",
+      "passed": true,
+      "notes": "You are an agent. Use JSON only.\nChoose either a tool call or a final answer.\n\nTASK:\nList the repo and finish with a fin"
+    }
+  ]
+}

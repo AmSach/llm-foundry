@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
-from pathlib import Path
-from typing import Iterable
-import json
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
+import json
 
-from .adapters import FixedBackend, SequenceBackend, TextBackend
+from .adapters import TextBackend
 from .agent import AgentRuntime, ToolRegistry
 from .benchmark import BenchmarkSuite, default_benchmark_cases
-from .config import BenchmarkConfig
 from .memory import CompressionEngine, ObsidianMemoryVault
-from .rag import LocalRetriever
 
 
 @dataclass
@@ -20,7 +17,7 @@ class HarnessSummary:
     total: int
     passed: int
     details: list[dict[str, object]]
-    generated_at: str = datetime.now(timezone.utc).isoformat()
+    generated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @property
     def pass_rate(self) -> float:
@@ -93,14 +90,6 @@ def coding_cases() -> list:
     ]
 
 
-@dataclass
-class ToolUseCase:
-    name: str
-    task: str
-    backend: TextBackend
-    expected_final: str
-
-
 def run_reasoning_harness(backend: TextBackend) -> HarnessSummary:
     suite = BenchmarkSuite(backend)
     report = suite.run(reasoning_cases())
@@ -133,22 +122,24 @@ def run_memory_harness(workspace_root: str | Path) -> HarnessSummary:
     vault.add_note("Project Goal", "Build a modular model framework with memory, compression, and tool use.", tags=["goal", "model"])
     vault.add_note("Memory Rule", "Always compress long conversations into a compact note before exceeding budget.", tags=["memory", "compression"])
     compressor = CompressionEngine(vault=vault)
+    transcript = [
+        "The system should keep important facts in memory.",
+        "It should compress long transcripts to fit a smaller context.",
+        "It should search Obsidian-like notes before answering.",
+        "The memory system must stay token efficient.",
+    ]
     context = compressor.compress_transcript(
         task="How should the system remember important facts?",
-        transcript=[
-            "The system should keep important facts.",
-            "It should compress long transcripts.",
-            "It should search Obsidian-like notes before answering.",
-        ],
+        transcript=transcript,
         memory_query="memory compression",
         target_tokens=256,
     )
-    passed = bool(context.memory_pack) and context.token_estimate_after <= context.token_estimate_before
+    passed = bool(context.compressed_prompt) and context.token_estimate_after <= 256
     return HarnessSummary(
         name="memory",
         total=1,
         passed=1 if passed else 0,
-        details=[{"name": "memory_pack", "passed": passed, "notes": context.summary[:120]}],
+        details=[{"name": "compressed_prompt", "passed": passed, "notes": context.compressed_prompt[:120]}],
     )
 
 

@@ -1,0 +1,14 @@
+{
+  "name": "memory",
+  "total": 1,
+  "passed": 1,
+  "pass_rate": 1.0,
+  "generated_at": "2026-05-02T01:29:59.663911+00:00",
+  "details": [
+    {
+      "name": "compressed_prompt",
+      "passed": true,
+      "notes": "MEMORY SUMMARY:\nThe system should keep important facts in memory. The memory system must stay token efficient. It should"
+    }
+  ]
+}
