@@ -5,14 +5,18 @@ from pathlib import Path
 
 from .adapters import build_backend
 from .benchmark import BenchmarkSuite, default_benchmark_cases
+from .config import ModelConfig
 from .evaluation import EvaluationItem, EvaluationSuite
+from .harnesses import run_all_harnesses
+from .memory import CompressionEngine, ObsidianMemoryVault
+from .model_training import train_model_from_corpus
 from .reasoning import ReflectionEngine
 from .safety import SafetyLayer
 from .training import train_from_text
 
 
 PROJECT_NAME = "llm-foundry"
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,6 +40,30 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument("--output", default="benchmark.json")
     benchmark.add_argument("--markdown", default="benchmark.md")
     benchmark.add_argument("--case", action="append")
+
+    compress = sub.add_parser("compress")
+    compress.add_argument("--task", required=True)
+    compress.add_argument("--transcript-file", required=True)
+    compress.add_argument("--memory-root", default="memory-vault")
+    compress.add_argument("--memory-query", default="")
+    compress.add_argument("--target-tokens", type=int, default=512)
+    compress.add_argument("--save-note", default="")
+
+    harness = sub.add_parser("harness")
+    harness.add_argument("--backend", default="echo")
+    harness.add_argument("--model", default=None)
+    harness.add_argument("--workspace", default="/home/workspace/Projects/llm-foundry")
+    harness.add_argument("--output-dir", default="reports")
+
+    train_model = sub.add_parser("train-model")
+    train_model.add_argument("--corpus", required=True)
+    train_model.add_argument("--config", default="")
+    train_model.add_argument("--output", default="model-run.json")
+    train_model.add_argument("--tokenizer-kind", default="byte")
+    train_model.add_argument("--tokenizer-name", default=None)
+    train_model.add_argument("--context-length", type=int, default=2048)
+    train_model.add_argument("--d-model", type=int, default=256)
+    train_model.add_argument("--steps", type=int, default=100)
 
     smoke = sub.add_parser("smoke-test")
     smoke.add_argument("--corpus", default="examples/corpus.txt")
@@ -80,6 +108,44 @@ def main() -> None:
         print(f"total={report.total} passed={report.passed} pass_rate={report.pass_rate:.2%} mean_risk={report.mean_risk:.3f}")
         print(f"wrote {json_path}")
         print(f"wrote {md_path}")
+        return
+    if args.cmd == "compress":
+        transcript = Path(args.transcript_file).read_text().splitlines()
+        vault = ObsidianMemoryVault(args.memory_root)
+        engine = CompressionEngine(vault=vault)
+        context = engine.compress_transcript(
+            task=args.task,
+            transcript=transcript,
+            memory_query=args.memory_query or args.task,
+            target_tokens=args.target_tokens,
+        )
+        if args.save_note:
+            note = engine.save_context_note(context, title=args.save_note)
+            if note:
+                print(f"saved-note={note.title}")
+        print(context.to_prompt())
+        print(f"before_tokens={context.token_estimate_before} after_tokens={context.token_estimate_after}")
+        return
+    if args.cmd == "harness":
+        backend = build_backend(args.backend, args.model)
+        reports = run_all_harnesses(backend, args.workspace)
+        output_dir = Path(args.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for name, report in reports.items():
+            report.write_json(output_dir / f"{name}.json")
+            report.write_markdown(output_dir / f"{name}.md")
+            print(f"{name} {report.passed}/{report.total} {report.pass_rate:.2%}")
+        return
+    if args.cmd == "train-model":
+        if args.config:
+            config = ModelConfig.load(args.config)
+        else:
+            config = ModelConfig(context_length=args.context_length, d_model=args.d_model, training_steps=args.steps)
+            config.tokenizer.kind = args.tokenizer_kind
+            config.tokenizer.model_name = args.tokenizer_name
+        run = train_model_from_corpus(args.corpus, config)
+        Path(args.output).write_text(str(run))
+        print(run)
         return
     if args.cmd == "smoke-test":
         corpus = Path(args.corpus)
