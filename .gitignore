@@ -4,3 +4,8 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+memory-vault/
+reports/
+benchmark.json
+benchmark.md
+model-run.json

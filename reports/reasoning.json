@@ -3,7 +3,7 @@
   "total": 5,
   "passed": 3,
   "pass_rate": 0.6,
-  "generated_at": "2026-05-02T01:29:59.662643+00:00",
+  "generated_at": "2026-05-02T01:52:55.029863+00:00",
   "details": [
     {
       "name": "instruction_exact",
