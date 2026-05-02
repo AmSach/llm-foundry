@@ -28,15 +28,26 @@ Run the same prompts through different backends and evaluate them with the same 
 
 Use the bundled harnesses to test reasoning, coding, tool use, and memory behavior before deploying a model.
 
+## 8. Expose more tools to the agent
+
+Use `--policy safe` for workspace-only tools, or `--policy full` when you want shell access too. You can also extend `ToolRegistry` with custom tools.
+
 ## Core commands
 
 ```bash
 python -m llm_foundry smoke-test
 python -m llm_foundry benchmark --backend echo --output benchmark.json --markdown benchmark.md
 python -m llm_foundry train-scratch --corpus examples/corpus.txt --steps 100 --context 64 --d-model 128
-python -m llm_foundry compress --task "Summarize this" --transcript "..."
+python -m llm_foundry compress --task "Summarize this" --transcript-file "..."
 python -m llm_foundry harness --backend echo
+python -m llm_foundry agent --task "Search the repo and answer"
 ```
+
+## Agent modes
+
+- `--policy safe` keeps to workspace tools only.
+- `--policy full` allows shell execution.
+- `ToolRegistry` can also be extended with custom tools.
 
 ## Training scripts
 

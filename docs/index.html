@@ -1,136 +1,133 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LLM Foundry Documentation</title>
-    <meta
-      name="description"
-      content="LLM Foundry is a modular framework for building, integrating, compressing, remembering, and evaluating language models."
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main class="page">
-      <section class="hero card">
-        <div class="eyebrow">LLM Foundry</div>
-        <h1>A modular system for useful long-horizon AI</h1>
-        <p class="lede">
-          LLM Foundry is not just a model. It is the workshop around a model. It gives you memory,
-          compression, tools, traces, training, and tests so the system can do real work instead of
-          just sounding smart.
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM Foundry Documentation</title>
+  <meta name="description" content="LLM Foundry is a modular framework for building, integrating, compressing, remembering, and evaluating language models." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="hero card">
+      <div class="eyebrow">LLM Foundry</div>
+      <h1>A modular system for useful long-horizon AI</h1>
+      <p class="lead">
+        LLM Foundry is not just a model. It is the workshop around a model. It gives you memory,
+        compression, tools, traces, training, and tests so the system can do real work instead of
+        just sounding smart.
+      </p>
+      <div class="pill-row">
+        <span class="pill">Model agnostic</span>
+        <span class="pill">Memory aware</span>
+        <span class="pill">Tool ready</span>
+        <span class="pill">Evaluation first</span>
+      </div>
+    </section>
+
+    <section class="grid two-up">
+      <article class="card">
+        <h2>Explain it like a kid</h2>
+        <p>
+          Think of the model as the brain, the tokenizer as the translator, memory as the
+          notebook, compression as the editor, tools as the hands, and harnesses as the quizzes.
         </p>
-        <div class="pill-row">
-          <span class="pill">Model agnostic</span>
-          <span class="pill">Memory aware</span>
-          <span class="pill">Tool ready</span>
-          <span class="pill">Evaluation first</span>
-        </div>
-      </section>
+        <p>
+          That is how the system keeps important facts, uses fewer tokens, and gets better over
+          time.
+        </p>
+      </article>
 
-      <section class="grid two-up">
-        <article class="card">
-          <h2>Explain it like a kid</h2>
-          <p>
-            Think of the model as the brain, the tokenizer as the translator, memory as the
-            notebook, compression as the editor, tools as the hands, and harnesses as the quizzes.
-          </p>
-          <p>
-            That is how the system keeps important facts, uses fewer tokens, and gets better over
-            time.
-          </p>
-        </article>
+      <article class="card">
+        <h2>What it is not</h2>
+        <p>
+          It is not a frontier-trained base model yet. It is the control plane around a model,
+          which is what you need if you want long-term useful behavior, memory, and agent work.
+        </p>
+        <p>
+          The project is designed to plug into existing models or future custom models without
+          rewriting the rest of the stack.
+        </p>
+      </article>
+    </section>
 
-        <article class="card">
-          <h2>What it is not</h2>
-          <p>
-            It is not a frontier-trained base model yet. It is the control plane around a model,
-            which is what you need if you want long-term useful behavior, memory, and agent work.
-          </p>
-          <p>
-            The project is designed to plug into existing models or future custom models without
-            rewriting the rest of the stack.
-          </p>
-        </article>
-      </section>
+    <section class="card">
+      <h2>Why it helps with long-term decision making</h2>
+      <ol>
+        <li>It compresses long context into a compact prompt.</li>
+        <li>It saves important facts in an Obsidian-style memory vault.</li>
+        <li>It lets the model call tools instead of guessing.</li>
+        <li>It records traces, so good behavior can become training data.</li>
+        <li>It runs harnesses, so you can measure whether the system really improved.</li>
+      </ol>
+    </section>
 
-      <section class="card">
-        <h2>Why it helps with long-term decision making</h2>
-        <ol>
-          <li>It compresses long context into a compact prompt.</li>
-          <li>It saves important facts in an Obsidian-style memory vault.</li>
-          <li>It lets the model call tools instead of guessing.</li>
-          <li>It records traces, so good behavior can become training data.</li>
-          <li>It runs harnesses, so you can measure whether the system really improved.</li>
-        </ol>
-      </section>
+    <section class="grid three-up">
+      <article class="card">
+        <h2>Use cases</h2>
+        <ul>
+          <li>long-running assistants</li>
+          <li>research and analysis agents</li>
+          <li>coding helpers</li>
+          <li>document and knowledge workflows</li>
+          <li>model experimentation and training</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>Advantages over plain chat models</h2>
+        <ul>
+          <li>less wasted context</li>
+          <li>better recall of important facts</li>
+          <li>tool use for real tasks</li>
+          <li>trace export for learning</li>
+          <li>repeatable testing</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>Integration</h2>
+        <ul>
+          <li>OpenAI-compatible backends</li>
+          <li>Hugging Face backends</li>
+          <li>custom adapters that expose generate(prompt)</li>
+          <li>deterministic test backends</li>
+        </ul>
+      </article>
+    </section>
 
-      <section class="grid three-up">
-        <article class="card">
-          <h2>Use cases</h2>
-          <ul>
-            <li>long-running assistants</li>
-            <li>research and analysis agents</li>
-            <li>coding helpers</li>
-            <li>document and knowledge workflows</li>
-            <li>model experimentation and training</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h2>Advantages over plain chat models</h2>
-          <ul>
-            <li>less wasted context</li>
-            <li>better recall of important facts</li>
-            <li>tool use for real tasks</li>
-            <li>trace export for learning</li>
-            <li>repeatable testing</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h2>Integration</h2>
-          <ul>
-            <li>OpenAI-compatible backends</li>
-            <li>Hugging Face backends</li>
-            <li>custom adapters that expose generate(prompt)</li>
-            <li>deterministic test backends</li>
-          </ul>
-        </article>
-      </section>
+    <section class="card">
+      <h2>How to use it</h2>
+      <div class="code-block">
+        <code>python -m llm_foundry smoke-test</code>
+        <code>python -m llm_foundry benchmark --backend echo --output benchmark.json --markdown benchmark.md</code>
+        <code>python -m llm_foundry compress --task "Summarize this" --transcript-file path/to/transcript.txt</code>
+        <code>python -m llm_foundry harness --backend echo</code>
+        <code>python -m llm_foundry train-model --corpus examples/corpus.txt --config model.json</code>
+      </div>
+    </section>
 
-      <section class="card">
-        <h2>How to use it</h2>
-        <div class="code-block">
-          <code>python -m llm_foundry smoke-test</code>
-          <code>python -m llm_foundry benchmark --backend echo --output benchmark.json --markdown benchmark.md</code>
-          <code>python -m llm_foundry compress --task "Summarize this" --transcript-file path/to/transcript.txt</code>
-          <code>python -m llm_foundry harness --backend echo</code>
-          <code>python -m llm_foundry train-model --corpus examples/corpus.txt --config model.json</code>
-        </div>
-      </section>
-
-      <section class="grid two-up">
-        <article class="card">
-          <h2>Repository map</h2>
-          <ul class="links">
-            <li><a href="../README.md">README</a></li>
-            <li><a href="../EXPLAINER.md">Plain-English explainer</a></li>
-            <li><a href="../USAGE.md">Usage guide</a></li>
-            <li><a href="../paper.md">Technical paper</a></li>
-            <li><a href="../benchmark.md">Benchmark report</a></li>
-          </ul>
-        </article>
-        <article class="card">
-          <h2>Who should use it</h2>
-          <p>
-            If you want a system that can remember, compress, check, and act, this is the right
-            layer. If you only want a chatbot, it is probably too much.
-          </p>
-          <p>
-            If you want a model that can power product workflows, long tasks, and agent loops, this
-            is the part that makes that possible.
-          </p>
-        </article>
-      </section>
-    </main>
-  </body>
+    <section class="grid two-up">
+      <article class="card">
+        <h2>Repository map</h2>
+        <ul class="links">
+          <li><a href="../README.md">README</a></li>
+          <li><a href="../EXPLAINER.md">Plain-English explainer</a></li>
+          <li><a href="../USAGE.md">Usage guide</a></li>
+          <li><a href="../paper.md">Technical paper</a></li>
+          <li><a href="../benchmark.md">Benchmark report</a></li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>Who should use it</h2>
+        <p>
+          If you want a system that can remember, compress, check, and act, this is the right
+          layer. If you only want a chatbot, it is probably too much.
+        </p>
+        <p>
+          If you want a model that can power product workflows, long tasks, and agent loops, this
+          is the part that makes that possible.
+        </p>
+      </article>
+    </section>
+  </main>
+</body>
 </html>

@@ -50,7 +50,7 @@ Supported styles include:
 - deterministic local backends for testing
 - OpenAI-compatible HTTP endpoints
 - Hugging Face local models
-- sequence and scripted backends for reproducible harnesses
+- scripted backends for reproducible harnesses
 
 This makes the framework model agnostic. A model can be swapped without rewriting the rest of the stack.
 
@@ -123,6 +123,10 @@ The agent layer currently supports tool classes like:
 - workspace reading
 - workspace search
 - safe arithmetic
+- workspace write and append
+- web fetch and web search when enabled
+- GitHub API when enabled
+- shell execution when explicitly enabled
 
 That is enough to demonstrate the pattern and to export traces for later training.
 
@@ -250,7 +254,7 @@ This is often the most practical path because the biggest gains usually come fro
 
 A very important part of the system is that it can learn from itself.
 
-When an agent runs, it produces a trace. That trace is structured data. Structured data can be turned into training examples.
+When an agent runs, it produces a trace. That trace is structured data. Structured data can be turned into supervised training examples.
 
 That creates a loop:
 
@@ -330,7 +334,7 @@ A realistic production path looks like this:
 5. enable tool use
 6. run the harnesses
 7. export traces from real usage
-8. fine-tune on those traces
+8. fine-tune on those traces and optional delayed-reward signals
 9. repeat
 
 That loop is how a model becomes more useful over time.

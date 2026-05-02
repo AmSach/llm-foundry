@@ -1,5 +1,5 @@
 from .adapters import EchoBackend, FixedBackend, HuggingFacePipelineBackend, OpenAICompatibleBackend, SequenceBackend, ScriptedBackend, build_backend
-from .agent import AgentAction, AgentRuntime, AgentStep, AgentTrace, ToolRegistry
+from .agent import AgentAction, AgentRuntime, AgentStep, AgentTrace, ToolPolicy, ToolRegistry
 from .benchmarks import BenchmarkCase, BenchmarkReport, BenchmarkResult, BenchmarkSuite, default_benchmark_cases
 from .cascade import CascadeReasoner, CascadeResult
 from .config import BenchmarkConfig, ModelConfig, RuntimeConfig, TokenizerConfig, TrainingConfig

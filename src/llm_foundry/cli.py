@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from .adapters import build_backend
 from .benchmark import BenchmarkSuite, default_benchmark_cases
 from .config import ModelConfig
+from .datasets import TraceDataset
 from .evaluation import EvaluationItem, EvaluationSuite
 from .harnesses import run_all_harnesses
 from .memory import CompressionEngine, ObsidianMemoryVault
@@ -13,10 +15,11 @@ from .model_training import train_model_from_corpus
 from .reasoning import ReflectionEngine
 from .safety import SafetyLayer
 from .training import train_from_text
+from .agent import AgentRuntime, ToolPolicy, ToolRegistry
 
 
 PROJECT_NAME = "llm-foundry"
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -65,8 +68,15 @@ def build_parser() -> argparse.ArgumentParser:
     train_model.add_argument("--d-model", type=int, default=256)
     train_model.add_argument("--steps", type=int, default=100)
 
-    smoke = sub.add_parser("smoke-test")
-    smoke.add_argument("--corpus", default="examples/corpus.txt")
+    agent = sub.add_parser("agent")
+    agent.add_argument("--backend", default="echo")
+    agent.add_argument("--model", default=None)
+    agent.add_argument("--workspace", default="/home/workspace/Projects/llm-foundry")
+    agent.add_argument("--task", required=True)
+    agent.add_argument("--policy", default="safe")
+    agent.add_argument("--max-steps", type=int, default=6)
+    agent.add_argument("--output-trace", default="")
+    agent.add_argument("--export-sft", default="")
 
     train = sub.add_parser("train-scratch")
     train.add_argument("--corpus", required=True)
@@ -146,6 +156,21 @@ def main() -> None:
         run = train_model_from_corpus(args.corpus, config)
         Path(args.output).write_text(str(run))
         print(run)
+        return
+    if args.cmd == "agent":
+        backend = build_backend(args.backend, args.model)
+        policy = ToolPolicy(allow_web_fetch=args.policy != "safe", allow_web_search=args.policy != "safe", allow_github_api=args.policy != "safe", allow_shell=args.policy == "full")
+        tools = ToolRegistry(workspace_root=args.workspace, policy=policy)
+        runtime = AgentRuntime(backend=backend, tools=tools, max_steps=args.max_steps)
+        trace = runtime.run(args.task)
+        print(trace.final)
+        if args.output_trace:
+            trace_data = TraceDataset.from_agent_trace(trace, trace_id="cli-agent-trace")
+            Path(args.output_trace).write_text(json.dumps([record.to_dict() for record in trace_data.records], indent=2, ensure_ascii=False))
+        if args.export_sft:
+            dataset = TraceDataset.from_agent_trace(trace, trace_id="cli-agent-trace")
+            examples = dataset.to_sft_examples()
+            Path(args.export_sft).write_text("\n".join(json.dumps(example.to_dict(), ensure_ascii=False) for example in examples))
         return
     if args.cmd == "smoke-test":
         corpus = Path(args.corpus)
