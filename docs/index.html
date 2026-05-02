@@ -11,42 +11,108 @@
   <main class="page">
     <section class="hero card">
       <div class="eyebrow">LLM Foundry</div>
-      <h1>A modular system for useful long-horizon AI</h1>
+      <h1>The workshop around an LLM</h1>
       <p class="lead">
-        LLM Foundry is not just a model. It is the workshop around a model. It gives you memory,
-        compression, tools, traces, training, and tests so the system can do real work instead of
-        just sounding smart.
+        Start here. Pick a mode, fill a few fields, and copy the command. LLM Foundry wraps a
+        model with memory, compression, tools, traces, tests, and optional multi-endpoint failover.
       </p>
       <div class="pill-row">
+        <span class="pill">One prompt setup</span>
         <span class="pill">Model agnostic</span>
         <span class="pill">Memory aware</span>
         <span class="pill">Tool ready</span>
-        <span class="pill">Evaluation first</span>
+      </div>
+    </section>
+
+    <section class="card" id="start-here">
+      <div class="section-header">
+        <div>
+          <h2>Start in 30 seconds</h2>
+          <p>Choose a setup, fill the box, then copy the command.</p>
+        </div>
+        <button id="copy-command" class="ghost-button" type="button">Copy command</button>
+      </div>
+
+      <div class="wizard">
+        <div class="wizard-tabs" role="tablist" aria-label="Quick start modes">
+          <button class="wizard-tab active" type="button" data-mode="echo">1. Demo</button>
+          <button class="wizard-tab" type="button" data-mode="openai">2. One API</button>
+          <button class="wizard-tab" type="button" data-mode="multi">3. Multi-endpoint</button>
+        </div>
+
+        <div class="wizard-grid">
+          <label class="field echo-mode openai-mode multi-mode">
+            <span>Task</span>
+            <input id="task-input" type="text" value="Research this repo and summarize what it does." />
+          </label>
+
+          <label class="field echo-mode openai-mode multi-mode">
+            <span>Workspace root</span>
+            <input id="workspace-input" type="text" value="/home/workspace/Projects/llm-foundry" />
+          </label>
+
+          <label class="field echo-mode openai-mode multi-mode">
+            <span>Memory note title</span>
+            <input id="note-input" type="text" value="Project summary" />
+          </label>
+
+          <label class="field openai-mode multi-mode">
+            <span>API model</span>
+            <input id="model-input" type="text" value="gpt-4o-mini" />
+          </label>
+
+          <label class="field openai-mode multi-mode">
+            <span>API key env var</span>
+            <input id="key-env-input" type="text" value="OPENAI_API_KEY" />
+          </label>
+
+          <label class="field multi-mode">
+            <span>Endpoints JSON file</span>
+            <input id="endpoints-file-input" type="text" value="endpoints.json" />
+          </label>
+
+          <label class="field multi-mode">
+            <span>Strategy</span>
+            <select id="strategy-input">
+              <option value="failover">failover</option>
+              <option value="round_robin">round_robin</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="sample-panel" id="sample-panel">
+          <div class="sample-title">Sample config</div>
+          <pre id="sample-config">{
+  "backend": "echo"
+}</pre>
+        </div>
+
+        <div class="command-card">
+          <div class="command-label">Generated command</div>
+          <pre id="command-preview">python -m llm_foundry super-suit --backend echo --task "Research this repo and summarize what it does." --workspace "/home/workspace/Projects/llm-foundry"</pre>
+        </div>
+
+        <div class="hint" id="mode-hint">Demo mode is the fastest way to see the system working.</div>
       </div>
     </section>
 
     <section class="grid two-up">
       <article class="card">
-        <h2>Explain it like a kid</h2>
+        <h2>What this is</h2>
         <p>
-          Think of the model as the brain, the tokenizer as the translator, memory as the
-          notebook, compression as the editor, tools as the hands, and harnesses as the quizzes.
+          LLM Foundry is not the model. It is the workshop around the model. It adds memory,
+          compression, tools, traces, testing, and optional multi-endpoint API orchestration.
         </p>
         <p>
-          That is how the system keeps important facts, uses fewer tokens, and gets better over
-          time.
+          That is how a normal model becomes a worker that can survive long tasks.
         </p>
       </article>
 
       <article class="card">
         <h2>What it is not</h2>
         <p>
-          It is not a frontier-trained base model yet. It is the control plane around a model,
-          which is what you need if you want long-term useful behavior, memory, and agent work.
-        </p>
-        <p>
-          The project is designed to plug into existing models or future custom models without
-          rewriting the rest of the stack.
+          It is not a frontier-trained base model. It is the control plane around a model, which is
+          what you want when you need long-horizon behavior, tool use, and traceable workflows.
         </p>
       </article>
     </section>
@@ -108,25 +174,6 @@
       </p>
     </section>
 
-    <section class="card">
-      <h2>One-prompt workflow</h2>
-      <div class="code-block">
-        <code>python -m llm_foundry super-suit --api-endpoints-file endpoints.json --task "Research this repo, summarize it, and save a memory note" --save-note "repo summary" --output-trace trace.jsonl --export-sft sft.jsonl</code>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>How to use it</h2>
-      <div class="code-block">
-        <code>python -m llm_foundry smoke-test</code>
-        <code>python -m llm_foundry benchmark --backend echo --output benchmark.json --markdown benchmark.md</code>
-        <code>python -m llm_foundry compress --task "Summarize this" --transcript-file path/to/transcript.txt</code>
-        <code>python -m llm_foundry harness --backend echo</code>
-        <code>python -m llm_foundry train-model --corpus examples/corpus.txt --config model.json</code>
-        <code>python -m llm_foundry super-suit --api-endpoints-file endpoints.json --task "Do the whole workflow"</code>
-      </div>
-    </section>
-
     <section class="grid two-up">
       <article class="card">
         <h2>Repository map</h2>
@@ -151,5 +198,96 @@
       </article>
     </section>
   </main>
+
+  <script>
+    const modes = Array.from(document.querySelectorAll(".wizard-tab"));
+    const commandPreview = document.getElementById("command-preview");
+    const sampleConfig = document.getElementById("sample-config");
+    const modeHint = document.getElementById("mode-hint");
+    const copyButton = document.getElementById("copy-command");
+    const taskInput = document.getElementById("task-input");
+    const workspaceInput = document.getElementById("workspace-input");
+    const noteInput = document.getElementById("note-input");
+    const modelInput = document.getElementById("model-input");
+    const keyEnvInput = document.getElementById("key-env-input");
+    const endpointsFileInput = document.getElementById("endpoints-file-input");
+    const strategyInput = document.getElementById("strategy-input");
+    const allModeFields = Array.from(document.querySelectorAll(".echo-mode, .openai-mode, .multi-mode"));
+
+    const state = {
+      mode: "echo",
+      task: taskInput.value,
+      workspace: workspaceInput.value,
+      note: noteInput.value,
+      model: modelInput.value,
+      keyEnv: keyEnvInput.value,
+      endpointsFile: endpointsFileInput.value,
+      strategy: strategyInput.value,
+    };
+
+    const modeMeta = {
+      echo: {
+        label: "Demo mode is the fastest way to see the system working.",
+        command: () => `python -m llm_foundry super-suit --backend echo --task ${q(state.task)} --workspace ${q(state.workspace)} --save-note ${q(state.note)}`,
+        sample: () => JSON.stringify({ backend: "echo" }, null, 2),
+      },
+      openai: {
+        label: "Use one API endpoint when you already have a strong model provider.",
+        command: () => `export ${state.keyEnv}=...\npython -m llm_foundry super-suit --backend openai --model ${q(state.model)} --task ${q(state.task)} --workspace ${q(state.workspace)} --save-note ${q(state.note)}`,
+        sample: () => JSON.stringify({ backend: "openai", model: state.model, api_key_env: state.keyEnv }, null, 2),
+      },
+      multi: {
+        label: "Use multiple API endpoints when you want failover or round-robin orchestration.",
+        command: () => `python -m llm_foundry super-suit --api-endpoints-file ${q(state.endpointsFile)} --api-strategy ${q(state.strategy)} --task ${q(state.task)} --workspace ${q(state.workspace)} --save-note ${q(state.note)}`,
+        sample: () => JSON.stringify({
+          endpoints: [
+            { name: "fast", base_url: "https://api.example.com/v1", model: "model-a", api_key_env: "MODEL_A_API_KEY" },
+            { name: "backup", base_url: "https://api.backup.com/v1", model: "model-b", api_key_env: "MODEL_B_API_KEY" }
+          ],
+          strategy: state.strategy
+        }, null, 2),
+      }
+    };
+
+    function q(value) {
+      return JSON.stringify(value || "");
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      modes.forEach((button) => button.classList.toggle("active", button.dataset.mode === mode));
+      allModeFields.forEach((el) => el.classList.toggle("hidden", !el.classList.contains(`${mode}-mode`)));
+      commandPreview.textContent = modeMeta[mode].command();
+      sampleConfig.textContent = modeMeta[mode].sample();
+      modeHint.textContent = modeMeta[mode].label;
+    }
+
+    function refresh() {
+      state.task = taskInput.value;
+      state.workspace = workspaceInput.value;
+      state.note = noteInput.value;
+      state.model = modelInput.value;
+      state.keyEnv = keyEnvInput.value;
+      state.endpointsFile = endpointsFileInput.value;
+      state.strategy = strategyInput.value;
+      commandPreview.textContent = modeMeta[state.mode].command();
+      sampleConfig.textContent = modeMeta[state.mode].sample();
+    }
+
+    modes.forEach((button) => button.addEventListener("click", () => setMode(button.dataset.mode)));
+    [taskInput, workspaceInput, noteInput, modelInput, keyEnvInput, endpointsFileInput, strategyInput].forEach((input) => {
+      input.addEventListener("input", refresh);
+      input.addEventListener("change", refresh);
+    });
+
+    copyButton.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(commandPreview.textContent || "");
+      copyButton.textContent = "Copied";
+      setTimeout(() => { copyButton.textContent = "Copy command"; }, 1200);
+    });
+
+    setMode("echo");
+    refresh();
+  </script>
 </body>
 </html>
