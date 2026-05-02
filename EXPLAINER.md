@@ -20,7 +20,7 @@ It is not one giant model. It is the machinery around a model.
 That machinery can:
 
 - train a tiny model from scratch
-- connect to an existing model like GPT-style APIs or Hugging Face models
+- connect to an existing model like GPT-style APIs, Hugging Face models, or several APIs at once
 - compress long conversations into shorter memory notes
 - store those notes in an Obsidian-like vault
 - run an agent that can use tools
@@ -59,6 +59,9 @@ These are the tests. They ask, "Can the model reason? Can it code? Can it use to
 ### 7. Model integration
 This means the system can sit on top of many different models, not just one.
 
+### 8. Multi-endpoint orchestration
+This means the system can talk to several model APIs at once and fail over if one is slow or broken.
+
 ## Big picture
 
 The idea is simple:
@@ -70,5 +73,6 @@ The idea is simple:
 5. use tools if needed
 6. save traces for training later
 7. test everything repeatedly
+8. if needed, route through multiple API endpoints
 
 That is how you turn a model from a chat toy into a useful system.

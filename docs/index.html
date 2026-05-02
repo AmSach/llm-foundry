@@ -59,6 +59,7 @@
         <li>It lets the model call tools instead of guessing.</li>
         <li>It records traces, so good behavior can become training data.</li>
         <li>It runs harnesses, so you can measure whether the system really improved.</li>
+        <li>It can route through multiple model APIs when one endpoint is not enough.</li>
       </ol>
     </section>
 
@@ -89,9 +90,29 @@
           <li>OpenAI-compatible backends</li>
           <li>Hugging Face backends</li>
           <li>custom adapters that expose generate(prompt)</li>
-          <li>deterministic test backends</li>
+          <li>multi-endpoint failover and round-robin API bundles</li>
         </ul>
       </article>
+    </section>
+
+    <section class="card">
+      <h2>What the super-suit wrapper does</h2>
+      <p>
+        Super-suit mode is the "turn a normal model into a stronger worker" wrapper. It prepares
+        a task with memory, compresses the context, lets the model use tools, repairs bad tool
+        calls, and can export the trace after it finishes.
+      </p>
+      <p>
+        If you give it several API endpoints, it can use them as a bundle, so one model can fail
+        over to another if needed.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>One-prompt workflow</h2>
+      <div class="code-block">
+        <code>python -m llm_foundry super-suit --api-endpoints-file endpoints.json --task "Research this repo, summarize it, and save a memory note" --save-note "repo summary" --output-trace trace.jsonl --export-sft sft.jsonl</code>
+      </div>
     </section>
 
     <section class="card">
@@ -102,6 +123,7 @@
         <code>python -m llm_foundry compress --task "Summarize this" --transcript-file path/to/transcript.txt</code>
         <code>python -m llm_foundry harness --backend echo</code>
         <code>python -m llm_foundry train-model --corpus examples/corpus.txt --config model.json</code>
+        <code>python -m llm_foundry super-suit --api-endpoints-file endpoints.json --task "Do the whole workflow"</code>
       </div>
     </section>
 

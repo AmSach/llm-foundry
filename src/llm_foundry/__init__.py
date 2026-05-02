@@ -1,4 +1,4 @@
-from .adapters import EchoBackend, FixedBackend, HuggingFacePipelineBackend, OpenAICompatibleBackend, SequenceBackend, ScriptedBackend, build_backend
+from .adapters import EchoBackend, FixedBackend, HuggingFacePipelineBackend, MultiEndpointBackend, OpenAICompatibleBackend, SequenceBackend, ScriptedBackend, ApiEndpointSpec, build_backend, build_multi_endpoint_backend
 from .agent import AgentAction, AgentRuntime, AgentStep, AgentTrace, ToolPolicy, ToolRegistry
 from .benchmarks import BenchmarkCase, BenchmarkReport, BenchmarkResult, BenchmarkSuite, default_benchmark_cases
 from .cascade import CascadeReasoner, CascadeResult
@@ -10,5 +10,6 @@ from .model_training import ModelBundle, ModelTrainer, TokenStatistics, Training
 from .rag import LocalRetriever, RAGChunk
 from .reasoning import CounterfactualVerifier, MajorityVoteConsensus, ReflectionEngine, ReflectionResult
 from .safety import RewardShaper, SafetyLayer, SafetyScore
+from .super_suit import ModelSuperSuit, SuperSuitConfig, SuperSuitResult
 from .tokenizer import ByteTokenizer, CharacterTokenizer, HuggingFaceTokenizer, TokenizerConfigView, build_tokenizer, estimate_token_count
 from .training import ScratchTrainingConfig, TinyCausalLM, train_from_text
