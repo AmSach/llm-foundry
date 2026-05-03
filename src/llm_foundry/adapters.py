@@ -277,8 +277,10 @@ def build_backend(
         api_key = os.environ.get("OPENAI_API_KEY", "")
         return OpenAICompatibleBackend(api_key=api_key, model=model or "gpt-4o-mini")
     if kind == "anthropic":
-        api_key = os.environ["ANTHROPIC_API_KEY"]
+        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
         return AnthropicBackend(api_key=api_key, model=model or "claude-sonnet-4-20250514")
+    if kind == "qwen":
+        return HuggingFacePipelineBackend(model_name=model or "Qwen/Qwen2.5-0.5B-Instruct")
     if kind == "hf":
         if not model:
             raise ValueError("model is required for hf backend")

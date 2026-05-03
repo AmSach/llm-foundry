@@ -31,6 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     demo = sub.add_parser("demo")
     demo.add_argument("--backend", default="echo")
+    demo.add_argument("--provider", default="", help="Use qwen/openai/anthropic/hf or a multi-endpoint bundle")
     demo.add_argument("--model", default=None)
     demo.add_argument("--api-endpoints-file", default="")
     demo.add_argument("--api-endpoints-json", default="")
@@ -39,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     eval_cmd = sub.add_parser("eval")
     eval_cmd.add_argument("--backend", default="echo")
+    eval_cmd.add_argument("--provider", default="", help="Use qwen/openai/anthropic/hf or a multi-endpoint bundle")
     eval_cmd.add_argument("--model", default=None)
     eval_cmd.add_argument("--api-endpoints-file", default="")
     eval_cmd.add_argument("--api-endpoints-json", default="")
@@ -47,6 +49,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     benchmark = sub.add_parser("benchmark")
     benchmark.add_argument("--backend", default="echo")
+    benchmark.add_argument("--provider", default="", help="Use qwen/openai/anthropic/hf or a multi-endpoint bundle")
     benchmark.add_argument("--model", default=None)
     benchmark.add_argument("--api-endpoints-file", default="")
     benchmark.add_argument("--api-endpoints-json", default="")
@@ -66,6 +69,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     harness = sub.add_parser("harness")
     harness.add_argument("--backend", default="echo")
+    harness.add_argument("--provider", default="", help="Use qwen/openai/anthropic/hf or a multi-endpoint bundle")
     harness.add_argument("--model", default=None)
     harness.add_argument("--api-endpoints-file", default="")
     harness.add_argument("--api-endpoints-json", default="")
@@ -85,6 +89,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     agent = sub.add_parser("agent")
     agent.add_argument("--backend", default="echo")
+    agent.add_argument("--provider", default="", help="Use qwen/openai/anthropic/hf or a multi-endpoint bundle")
     agent.add_argument("--model", default=None)
     agent.add_argument("--api-endpoints-file", default="")
     agent.add_argument("--api-endpoints-json", default="")
@@ -98,6 +103,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     supersuit = sub.add_parser("super-suit")
     supersuit.add_argument("--backend", default="echo")
+    supersuit.add_argument("--provider", default="", help="Use qwen/openai/anthropic/hf or a multi-endpoint bundle")
     supersuit.add_argument("--model", default=None)
     supersuit.add_argument("--api-endpoints-file", default="")
     supersuit.add_argument("--api-endpoints-json", default="")
@@ -148,7 +154,7 @@ def main() -> None:
         run_studio(backend_factory=lambda kind, model, **kwargs: build_backend(kind, model, **kwargs))
         return
     if args.cmd == "demo":
-        backend = build_backend(args.backend, args.model, **_backend_kwargs(args))
+        backend = build_backend(args.provider or args.backend, args.model, **_backend_kwargs(args))
         engine = ReflectionEngine(backend)
         safety = SafetyLayer()
         result = engine.answer(args.prompt)
@@ -157,14 +163,14 @@ def main() -> None:
         print(f"SAFETY delayed_harm_risk={score.delayed_harm_risk:.2f} causal_credit={score.causal_credit:.2f}")
         return
     if args.cmd == "eval":
-        backend = build_backend(args.backend, args.model, **_backend_kwargs(args))
+        backend = build_backend(args.provider or args.backend, args.model, **_backend_kwargs(args))
         suite = EvaluationSuite(backend)
         results = suite.run(EvaluationItem(prompt=prompt) for prompt in args.prompt)
         for item in results:
             print(f"allowed={item.allowed} risk={item.delayed_harm_risk:.2f} prompt={item.prompt}")
         return
     if args.cmd == "benchmark":
-        backend = build_backend(args.backend, args.model, **_backend_kwargs(args))
+        backend = build_backend(args.provider or args.backend, args.model, **_backend_kwargs(args))
         suite = BenchmarkSuite(backend)
         cases = default_benchmark_cases()
         if args.case:
@@ -198,7 +204,7 @@ def main() -> None:
         print(f"before_tokens={context.token_estimate_before} after_tokens={context.token_estimate_after}")
         return
     if args.cmd == "harness":
-        backend = build_backend(args.backend, args.model, **_backend_kwargs(args))
+        backend = build_backend(args.provider or args.backend, args.model, **_backend_kwargs(args))
         reports = run_all_harnesses(backend, args.workspace)
         output_dir = Path(args.output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -219,7 +225,7 @@ def main() -> None:
         print(run)
         return
     if args.cmd == "agent":
-        backend = build_backend(args.backend, args.model, **_backend_kwargs(args))
+        backend = build_backend(args.provider or args.backend, args.model, **_backend_kwargs(args))
         policy = ToolPolicy(allow_web_fetch=args.policy != "safe", allow_web_search=args.policy != "safe", allow_github_api=args.policy != "safe", allow_shell=args.policy == "full")
         tools = ToolRegistry(workspace_root=args.workspace, policy=policy)
         runtime = AgentRuntime(backend=backend, tools=tools, max_steps=args.max_steps)
@@ -234,7 +240,7 @@ def main() -> None:
             Path(args.export_sft).write_text("\n".join(json.dumps(example.to_dict(), ensure_ascii=False) for example in examples))
         return
     if args.cmd == "super-suit":
-        backend = build_backend(args.backend, args.model, **_backend_kwargs(args))
+        backend = build_backend(args.provider or args.backend, args.model, **_backend_kwargs(args))
         config = SuperSuitConfig(
             workspace_root=args.workspace,
             memory_root=args.memory_root,

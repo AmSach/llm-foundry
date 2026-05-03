@@ -91,7 +91,7 @@ def run_studio(
 
 def _run_super_suit_flow(task: str, input_fn: InputFn, print_fn: PrintFn, backend_factory: BackendFactory) -> StudioOutcome:
     print_fn("Super-suit workflow")
-    backend_kind = _ask(input_fn, "Backend [echo/openai/hf/multi] [echo]: ", "echo").strip() or "echo"
+    backend_kind = _ask(input_fn, "Backend [echo/qwen/openai/anthropic/hf/multi] [echo]: ", "echo").strip() or "echo"
     model = _ask(input_fn, "Model name [blank for default]: ", "").strip() or None
     api_strategy = _ask(input_fn, "Multi-endpoint strategy [failover/round_robin] [failover]: ", "failover").strip() or "failover"
     api_endpoints_file = ""
@@ -167,7 +167,7 @@ def _run_super_suit_flow(task: str, input_fn: InputFn, print_fn: PrintFn, backen
 
 def _run_agent_flow(input_fn: InputFn, print_fn: PrintFn, backend_factory: BackendFactory) -> StudioOutcome:
     task = _ask(input_fn, "Agent task: ").strip()
-    backend_kind = _ask(input_fn, "Backend [echo/openai/hf/multi] [echo]: ", "echo").strip() or "echo"
+    backend_kind = _ask(input_fn, "Backend [echo/qwen/openai/anthropic/hf/multi] [echo]: ", "echo").strip() or "echo"
     model = _ask(input_fn, "Model name [blank for default]: ", "").strip() or None
     backend = backend_factory(backend_kind, model)
     tools = []
@@ -178,7 +178,7 @@ def _run_agent_flow(input_fn: InputFn, print_fn: PrintFn, backend_factory: Backe
 
 
 def _run_benchmark_flow(input_fn: InputFn, print_fn: PrintFn, backend_factory: BackendFactory) -> StudioOutcome:
-    backend_kind = _ask(input_fn, "Backend [echo/openai/hf/multi] [echo]: ", "echo").strip() or "echo"
+    backend_kind = _ask(input_fn, "Backend [echo/qwen/openai/anthropic/hf/multi] [echo]: ", "echo").strip() or "echo"
     model = _ask(input_fn, "Model name [blank for default]: ", "").strip() or None
     backend = backend_factory(backend_kind, model)
     suite = BenchmarkSuite(backend)
