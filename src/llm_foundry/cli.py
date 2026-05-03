@@ -13,6 +13,7 @@ from .evaluation import EvaluationItem, EvaluationSuite
 from .harnesses import run_all_harnesses
 from .memory import CompressionEngine, ObsidianMemoryVault
 from .model_training import train_model_from_corpus
+from .rag import build_embedding_index
 from .reasoning import ReflectionEngine
 from .safety import SafetyLayer
 from .studio import run_studio
@@ -53,6 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument("--output", default="benchmark.json")
     benchmark.add_argument("--markdown", default="benchmark.md")
     benchmark.add_argument("--case", action="append")
+    benchmark.add_argument("--workspace-memory-root", default="")
 
     compress = sub.add_parser("compress")
     compress.add_argument("--task", required=True)
@@ -123,6 +125,12 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--context", type=int, default=64)
     train.add_argument("--d-model", type=int, default=128)
 
+    index = sub.add_parser("index")
+    index.add_argument("--root", required=True)
+    index.add_argument("--output", default="embedding-index.json")
+    index.add_argument("--query", default="")
+    index.add_argument("--top-k", type=int, default=5)
+
     return parser
 
 
@@ -168,6 +176,9 @@ def main() -> None:
         print(f"total={report.total} passed={report.passed} pass_rate={report.pass_rate:.2%} mean_risk={report.mean_risk:.3f}")
         print(f"wrote {json_path}")
         print(f"wrote {md_path}")
+        if args.workspace_memory_root:
+            idx = build_embedding_index(args.workspace_memory_root)
+            print(f"memory_indexed={len(idx.documents)}")
         return
     if args.cmd == "compress":
         transcript = Path(args.transcript_file).read_text().splitlines()
@@ -258,6 +269,20 @@ def main() -> None:
         engine = ReflectionEngine(backend)
         result = engine.answer("smoke test")
         print(result.final)
+        print(train_from_text(str(corpus), 2, 8, 32))
+        return
+    if args.cmd == "train-scratch":
+        result = train_from_text(args.corpus, args.steps, args.context, args.d_model)
+        print(result)
+        return
+    if args.cmd == "index":
+        index = build_embedding_index(args.root)
+        path = index.save(args.output)
+        print(f"wrote {path}")
+        if args.query:
+            for item in index.search(args.query, top_k=args.top_k):
+                print(f"{item.path}: {item.score:.3f}: {item.text[:140]}")
+        return
         print(train_from_text(str(corpus), 2, 8, 32))
         return
     if args.cmd == "train-scratch":
