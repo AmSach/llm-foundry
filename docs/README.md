@@ -6,3 +6,5 @@ This folder contains a simple static documentation site for the project.
 - `styles.css` provides the visual styling.
 
 Open `docs/index.html` in a browser to read the overview, use cases, integration paths, and command examples.
+
+Proof screenshots live under `assets/proofs/sourcecode-dev-proof/` in the repo and are linked from the main README.

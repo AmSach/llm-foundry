@@ -32,3 +32,12 @@ Example:
 ```bash
 python -m llm_foundry proof --provider qwen --model Qwen/Qwen2.5-0.5B-Instruct
 ```
+
+## Proof images
+
+- [Prompt + answer](assets/proofs/sourcecode-dev-proof/01-prompt-answer.png)
+- [Agent trace](assets/proofs/sourcecode-dev-proof/02-agent-trace.png)
+- [Tests](assets/proofs/sourcecode-dev-proof/03-tests.png)
+- [Path handling](assets/proofs/sourcecode-dev-proof/04-paths.png)
+- [Diff](assets/proofs/sourcecode-dev-proof/05-diff.png)
+- [Terminal](assets/proofs/sourcecode-dev-proof/06-terminal.png)
