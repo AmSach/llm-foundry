@@ -41,3 +41,14 @@ python -m llm_foundry proof --provider qwen --model Qwen/Qwen2.5-0.5B-Instruct
 - [Path handling](assets/proofs/sourcecode-dev-proof/04-paths.png)
 - [Diff](assets/proofs/sourcecode-dev-proof/05-diff.png)
 - [Terminal](assets/proofs/sourcecode-dev-proof/06-terminal.png)
+
+
+## GitHub Pages
+
+A live GitHub Pages demo can host the docs site from `docs/`. Use it to try the default Qwen model path or BYOK providers.
+
+- Default model: `qwen`
+- BYOK providers: `openai`, `anthropic`
+- Multi-endpoint bundles: `multi` / `openai-multi`
+
+For the live page, use the commands on `docs/index.html`.

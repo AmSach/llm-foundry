@@ -174,6 +174,52 @@
       </p>
     </section>
 
+
+    <section class="card" id="try-it">
+      <div class="section-header">
+        <div>
+          <h2>Try it live</h2>
+          <p>Use the built-in model or bring your own key. This page is meant to be a quick launcher, not a fake screenshot.</p>
+        </div>
+      </div>
+      <div class="grid two-up">
+        <div class="sample-panel">
+          <div class="sample-title">Default model</div>
+          <pre>python -m llm_foundry proof --provider qwen --model Qwen/Qwen2.5-0.5B-Instruct --question "Use the tools to find where build_backend is defined, cite the exact file path, and explain the answer in one sentence."</pre>
+        </div>
+        <div class="sample-panel">
+          <div class="sample-title">BYOK providers</div>
+          <pre>python -m llm_foundry demo --provider openai --model gpt-4o-mini --prompt "Explain the tradeoff between latency and memory in one paragraph."
+python -m llm_foundry demo --provider anthropic --model claude-3-5-sonnet-20241022 --prompt "Explain the tradeoff between latency and memory in one paragraph."</pre>
+        </div>
+      </div>
+      <div class="grid two-up" style="margin-top:16px;">
+        <div class="sample-panel">
+          <div class="sample-title">Multi-endpoint config</div>
+          <pre>{
+  "endpoints": [
+    {
+      "name": "qwen",
+      "provider": "qwen",
+      "model": "Qwen/Qwen2.5-0.5B-Instruct"
+    },
+    {
+      "name": "openai",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "api_key_env": "OPENAI_API_KEY"
+    }
+  ]
+}</pre>
+        </div>
+        <div class="sample-panel">
+          <div class="sample-title">What this page does</div>
+          <pre>It shows the commands, the proof images, and the fastest path to run the stack.
+The goal is to try the model, then try the tools, then compare the outputs.</pre>
+        </div>
+      </div>
+    </section>
+
     <section class="grid two-up">
       <article class="card">
         <h2>Repository map</h2>
