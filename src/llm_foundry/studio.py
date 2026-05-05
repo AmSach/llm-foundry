@@ -58,7 +58,7 @@ def run_studio(
     backend_factory: BackendFactory = build_backend,
 ) -> StudioOutcome:
     print_fn("LLM Foundry Studio")
-    print_fn("Type a task to run it, or type setup, benchmark, train, agent, or quit.")
+    print_fn("Type a task to run it, or type setup, benchmark, train, agent, proof, or quit.")
     print_fn("If you type a plain task, it runs the super-suit workflow.")
     outcome = StudioOutcome()
     while True:
@@ -83,6 +83,10 @@ def run_studio(
             continue
         if command == "agent":
             result = _run_agent_flow(input_fn, print_fn, backend_factory)
+            outcome = result
+            continue
+        if command == "proof":
+            result = _run_proof_flow(input_fn, print_fn, backend_factory)
             outcome = result
             continue
         result = _run_super_suit_flow(raw, input_fn, print_fn, backend_factory)
@@ -164,6 +168,33 @@ def _run_super_suit_flow(task: str, input_fn: InputFn, print_fn: PrintFn, backen
         active_endpoints=result.active_endpoints,
     )
 
+
+
+
+def _run_proof_flow(input_fn: InputFn, print_fn: PrintFn, backend_factory: BackendFactory) -> StudioOutcome:
+    provider = _ask(input_fn, "Provider [qwen/openai/anthropic/hf] [qwen]: ", "qwen").strip() or "qwen"
+    model = _ask(input_fn, "Model [Qwen/Qwen2.5-0.5B-Instruct]: ", "Qwen/Qwen2.5-0.5B-Instruct").strip() or "Qwen/Qwen2.5-0.5B-Instruct"
+    workspace = _ask(input_fn, "Workspace root [/home/workspace/Projects/llm-foundry]: ", "/home/workspace/Projects/llm-foundry").strip() or "/home/workspace/Projects/llm-foundry"
+    question = _ask(input_fn, "Question [Use the tools to find where build_backend is defined, cite the exact file path, and explain the answer in one sentence.]: ", "Use the tools to find where build_backend is defined, cite the exact file path, and explain the answer in one sentence.").strip() or "Use the tools to find where build_backend is defined, cite the exact file path, and explain the answer in one sentence."
+    backend = backend_factory(provider, model)
+    tools = ToolRegistry(workspace_root=workspace, policy=ToolPolicy(allow_web_fetch=False, allow_web_search=False, allow_github_api=False, allow_shell=False))
+    runtime = AgentRuntime(backend=backend, tools=tools, max_steps=4)
+    trace = runtime.run(question)
+    payload = {
+        "provider": provider,
+        "model": model,
+        "workspace": workspace,
+        "question": question,
+        "final": trace.final,
+        "steps": [step.__dict__ for step in trace.steps],
+    }
+    out = Path("proof-run.json")
+    out.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    print_fn("Proof run complete")
+    print_fn(question)
+    print_fn(trace.final)
+    print_fn(str(out))
+    return StudioOutcome(mode="proof", task=question, final=trace.final, generated_files=[str(out)])
 
 def _run_agent_flow(input_fn: InputFn, print_fn: PrintFn, backend_factory: BackendFactory) -> StudioOutcome:
     task = _ask(input_fn, "Agent task: ").strip()

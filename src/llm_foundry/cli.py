@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from .adapters import build_backend
-from .agent import ToolPolicy, ToolRegistry
+from .agent import AgentRuntime, ToolPolicy, ToolRegistry
 from .benchmark import BenchmarkSuite, default_benchmark_cases
 from .config import ModelConfig
 from .datasets import TraceDataset
@@ -19,6 +19,7 @@ from .safety import SafetyLayer
 from .studio import run_studio
 from .super_suit import ModelSuperSuit, SuperSuitConfig
 from .training import train_from_text
+from .adapters import build_backend
 
 PROJECT_NAME = "llm-foundry"
 VERSION = "0.3.1"
@@ -130,6 +131,13 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--steps", type=int, default=100)
     train.add_argument("--context", type=int, default=64)
     train.add_argument("--d-model", type=int, default=128)
+
+    proof = sub.add_parser("proof")
+    proof.add_argument("--provider", default="qwen")
+    proof.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
+    proof.add_argument("--workspace", default="/home/workspace/Projects/llm-foundry")
+    proof.add_argument("--question", default="Use the tools to find where build_backend is defined, cite the exact file path, and explain the answer in one sentence.")
+    proof.add_argument("--output", default="proof-run.json")
 
     index = sub.add_parser("index")
     index.add_argument("--root", required=True)
@@ -294,6 +302,26 @@ def main() -> None:
     if args.cmd == "train-scratch":
         result = train_from_text(args.corpus, args.steps, args.context, args.d_model)
         print(result)
+        return
+    if args.cmd == "proof":
+        backend = build_backend(args.provider, args.model)
+        tools = ToolRegistry(workspace_root=args.workspace, policy=ToolPolicy(allow_web_fetch=False, allow_web_search=False, allow_github_api=False, allow_shell=False))
+        runtime = AgentRuntime(backend=backend, tools=tools, max_steps=4)
+        trace = runtime.run(args.question)
+        payload = {
+            "provider": args.provider,
+            "model": args.model,
+            "question": args.question,
+            "final": trace.final,
+            "steps": [step.__dict__ for step in trace.steps],
+        }
+        Path(args.output).write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+        print("QUESTION:")
+        print(args.question)
+        print("OUTPUT:")
+        print(trace.final)
+        print("JSON:")
+        print(args.output)
         return
 
 

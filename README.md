@@ -22,3 +22,13 @@ Example:
 ```bash
 python -m llm_foundry demo --provider qwen --model Qwen/Qwen2.5-0.5B-Instruct --prompt "Hello"
 ```
+
+## Proof mode
+
+Use `proof` for a terminal-first demo that shows the question, tool call trace, final answer, and JSON artefact. It is designed for screenshots and file explorer use on Windows, macOS, and Linux.
+
+Example:
+
+```bash
+python -m llm_foundry proof --provider qwen --model Qwen/Qwen2.5-0.5B-Instruct
+```

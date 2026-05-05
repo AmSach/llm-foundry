@@ -112,8 +112,16 @@ class ToolRegistry:
         return self.tools[action.tool](**action.arguments)
 
     def _resolve_path(self, value: str | os.PathLike[str]) -> Path:
-        path = (self.workspace_root / Path(value)).resolve()
-        if self.workspace_root not in path.parents and path != self.workspace_root:
+        raw = str(value)
+        candidate = Path(raw).expanduser()
+        if candidate.is_absolute():
+            path = candidate.resolve()
+        else:
+            if len(candidate.parts) == 1 and len(raw) >= 3 and raw[1:3] == ':\\':
+                path = candidate.resolve()
+            else:
+                path = (self.workspace_root / candidate).resolve()
+        if self.workspace_root not in path.parents and path != self.workspace_root and not candidate.is_absolute():
             raise ValueError("Path escapes workspace root")
         return path
 
